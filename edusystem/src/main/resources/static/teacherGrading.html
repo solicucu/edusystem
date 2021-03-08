@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>学生成绩录入</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <style type="text/css" rel="stylesheet">
+     *{
+                margin: 0;
+                padding: 0;
+            }
+            html,body{
+                width: 100%;
+                height: 100%;               
+                background-color: #FFFFFF;
+            }
+            a{
+                display:block;
+            }
+            .left-banner a:link {color:#FFFFFF; } 
+            .left-banner a:visited {color:#FFFFFF; } 
+            .left-banner a:hover {color:#FFFFFF; } 
+            .left-banner a:active {color:#FFFFFF;} 
+             #top a:link {color:#FFFFFF; } 
+            #top a:visited {color:#FFFFFF; } 
+            #top a:hover {color:#FFFFFF; } 
+            #top a:active {color:#FFFFFF;} 
+            .top-body{
+                height:20%;
+                background-image: url('imgs/top_bg.jpg');
+                border:0px solid gray;
+            }
+            .main-body{
+                height:79%;
+                border:0px solid gray;
+            }
+            .left-banner{
+                width:10%;
+                height:100%;
+                float:left;
+                border-right:1px solid gray;
+            }
+            .right-content{
+                width:89%;
+                height:100%;
+                float:right;
+                 border:0px solid gray;
+            }
+    .nav_bar{
+    	width:100%;
+    	height:10%;
+    	border:0px solid gray;
+    	}
+    .main_content{
+    	width:100%;
+    	height:89%;
+    	border:0px solid gray;
+    }
+    .top_content{
+    	width:100%;
+    	height:40px;
+    	padding:2px;
+    	border:0px solid gray;
+    }
+    .search{
+    	width:50%;
+    	height:100%;
+    	float:left;
+    	border:0px solid gray;
+    }
+    .table_body{
+    	width:100%;
+    	height:60%;
+
+    	border:0px solid gray;
+    }
+     .bottom-body{
+         width:100%;
+         height:12%;
+         margin-top: 5px;
+     }
+     .backhome{
+                width:15%;
+                float:right;
+                text-align: right;
+                 margin-right:70px;
+                vertical-align: bottom;
+
+                
+            }
+    .operating a{
+    text-decoration: none;
+    }
+	 .table-tr{
+	 }
+	 .course-id{}
+     .student-id{}
+	 .student-name{}
+	 .student-grade{}
+	 .page-ul{
+	 }
+	 .page-ul-li{
+		 display: inline-block;
+		 float: right;
+		 top: 1px;
+	 }
+ 	</style>
+
+    <script type="text/javascript   ">
+        $(document).ready(
+            function () {
+            }
+        );
+        var s = window.sessionStorage.getItem("userId");
+
+        function setscInformation(obj) {
+            var td = $(obj).parent().parent().find('td');
+            $('#course-id').val(td.eq(0).text());
+            $('#student-id').val(td.eq(1).text());
+            $('#student-name').val(td.eq(2).text());
+            $('#grade').val(td.eq(3).text())
+        }
+
+        function insertGrade() {
+            var courseId = $('#course-id').val();
+           var studentId=$('#student-id').val();
+            var grade = $('#grade').val();
+            var urlStr = 'http://127.0.0.1:8080/sc/update?sid='+ studentId + "&cid=" + courseId + "&grade=" + grade;
+            // alert(urlStr);
+            $.ajax({
+                url:urlStr,
+                dataType:'json',
+                success:function (obj) {
+                    if(obj.code == 0){
+                        searchCourseByName();
+                        alert('添加成绩成功！')
+                    }
+                    else {
+                        alert("添加成绩失败！");
+                    }
+                },
+                error:function (error) {
+                    console.log(error)
+                }
+            })
+        }
+
+        function searchCourseByName() {
+            var page = $('#page_num').val()-1;
+            var size = 4;
+            var sortFieldName = 'id';
+            var asc = 1;
+            var teacherId = s;
+            var name =$('#search-courseName').val();
+            var urlStr = 'http://127.0.0.1:8080/sc/getByCnameAndTidByPage?page='+ page + '&tid='+teacherId+'&cname='+ name + '&size=' + size + '&sortFieldName=' + sortFieldName + '&asc=' + asc;
+             // alert(urlStr);
+            $.ajax({
+                url:urlStr,
+                dataType:'json',
+                cache:false,
+                success:function (obj) {
+                    setGradeTableInformation(obj)
+                },
+                error:function (error) {
+                    console.log(error)
+                }
+            })
+        }
+
+        function searchStudentByName() {
+            var sname =$('#search-studentName').val();
+            var cname =$('#search-courseName').val();
+            var teacherId=s;
+            var urlStr = 'http://127.0.0.1:8080/sc/getByCnameAndSnameAndTid?cname='+cname+'&sname='+sname+'&tid='+ teacherId;
+            //  alert(urlStr);
+            $.ajax({
+                url:urlStr,
+                dataType:'json',
+                cache:false,
+                success:function (obj) {
+                    var table_tr = $('.table-tr');
+                    var course_id = $('.course-id');
+                    var student_id=$('.student-id');
+                    var student_name=$('.student-name');
+                    var student_grade=$('.student-grade');
+                        table_tr.eq(0).removeClass('hidden');
+                        course_id.eq(0).html(obj.data.cid);
+                        student_id.eq(0).text(obj.data.sid);
+                        student_name.eq(0).text(obj.data.sname);
+                        student_grade.eq(0).text(obj.data.grade);
+                    for (var i = 1; i < 4; i++) {
+                        table_tr.eq(i).addClass('hidden')
+                    }
+                    document.getElementById("showpage").innerHTML=1;
+
+                },
+                error:function (error) {
+                    console.log(error)
+                }
+            })
+        }
+
+        function setGradeTableInformation(obj) {
+            var table_tr = $('.table-tr');
+            var course_id = $('.course-id');
+            var student_id=$('.student-id');
+            var student_name=$('.student-name');
+            var student_grade=$('.student-grade');
+            for(var i = 0; i < obj.data.numberOfElements; i++){
+                table_tr.eq(i).removeClass('hidden');
+                course_id.eq(i).html(obj.data.content[i].cid);
+                student_id.eq(i).text(obj.data.content[i].sid);
+                student_name.eq(i).text(obj.data.content[i].sname);
+                student_grade.eq(i).text(obj.data.content[i].grade);
+
+            }
+            for (var i = obj.data.numberOfElements; i < 4; i++) {
+                table_tr.eq(i).addClass('hidden')
+            }
+            document.getElementById("showpage").innerHTML=obj.data.totalPages;
+        }
+
+
+    </script>
+
+    <script type="text/javascript">
+        window.onload=function(){
+            var s = window.sessionStorage.getItem("userId");
+            var n = null;
+            var urlStr = 'http://127.0.0.1:8080/teacher/getById?id=' + s;
+            $.ajax({
+                url:urlStr,
+                dataType:'json',
+                async:false,
+                success:function (obj) {
+                    if(obj.code === 0){
+                        n = obj.data.name;
+                    }
+                    else{
+                        alert(obj.message)
+                    }
+                },
+                error:function (error) {
+                    alert("can't connected to server !");
+                    console.log(error)
+                }
+            })
+            document.getElementById("username").innerHTML=n;
+            if(s == null){
+                alert('未登录');
+                window.location.href="jwIndex.html"
+            }
+        }
+    </script>
+</head>
+<body>
+	<div class="top-body">
+        <div style="width:70%;font-size: 45px;color:#FFFFFF;text-align:left;vertical-align:middle;line-height:100px;margin-top: 20px;margin-left: 4%;float:left;">教&nbsp;&nbsp;学&nbsp;&nbsp;服&nbsp;&nbsp;务&nbsp;&nbsp;系&nbsp;&nbsp;统
+        </div>
+        <div style="width:20%;height:30px;font-size:20px;color:#FFFFFF;float:right;margin-top: 50px;">
+            欢迎&nbsp;&nbsp;<span id="username">WTF</span>&nbsp;&nbsp;!
+        </div>
+        <div class="backhome">
+            <div id ="top" class="row show-grid">
+                <a style="display:block;" href="jwTeacher.html">
+                <div class="col-sm-2">
+                    <img src="imgs/back.png" width="18px" height="18px">
+                </div>
+                 <div class="col-sm-3">
+                    返回
+                </div>
+                </a>
+                <a style="display:block;" href="jwIndex.html">
+                <div class="col-sm-2">
+                    <img src="imgs/home.png" width="18px" height="18px">
+                </div>
+                 <div class="col-sm-3">
+                    首页
+                </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="main-body">
+        <div class="left-banner">
+            <div style="background: #A020F0;width:90%; height:20px;margin:5px;text-align: center;">
+            <a style="font-size:15px;text-decoration:none; " href="teacherGrading.html"  >学生成绩录入</a>
+            </div> 
+        </div>
+        <div class="right-content">
+            <div class="nav_bar">
+		<font font-size="18px"> <b>	&nbsp;&nbsp;学生成绩录入</b></font>
+		</div>
+		<hr/>
+		<div class="main_content">
+			<div class="top_content">
+                <div class="search">
+                    <div class="row show-grid">
+                        <div class="col col-sm-3">
+                            <input style="height:38px;width: 150px" type="text"  id="search-courseName" placeholder="请输入课程名称">
+
+                        </div>
+                        <div class="col col-sm-3">
+                            <button type="button" class="btn btn-default" onclick="searchCourseByName()">搜索课程</button>
+
+                        </div>
+                        <div class="col col-sm-3">
+                            <input style="height:38px;width: 150px" type="text"  id="search-studentName" placeholder="请输入学生姓名">
+
+                        </div>
+                        <div class="col col-sm-3">
+                            <button type="button" class="btn btn-default" onclick="searchStudentByName()">搜索学生</button>
+
+                        </div>
+                    </div>
+                <!--    <div style="width:20%;border:0px solid gray;float:left">
+                        <input style="height:38px" type="text"  id="search-courseName" placeholder="请输入课程名称">
+                    </div>
+                    <div style="width:15%;margin-left:20px;border:0px solid gray;float:left">
+                    <button type="button" class="btn btn-default" onclick="searchCourseByName()">搜索课程</button>
+                    </div>
+                    <div style="width:25%;border:0px solid gray;float:left">
+                        <input style="height:38px" type="text"  id="search-studentName" placeholder="请输入学生姓名">
+                    </div>
+                    <div style="width:35%;border:0px solid gray;float:right">
+                         <button type="button" class="btn btn-default" onclick="searchStudentByName()">搜索学生</button>
+                    </div>
+                    -->
+                </div>
+			</div>
+			<hr/>
+			<div class="table_body">
+				<table class="table table-striped">
+                    <thead style="background-color: #F9FAFB">
+                    <tr>
+                    	<th>课程编号</th>
+                        <th>学生编号</th>
+                        <th>学生姓名</th>                        
+                        <th>学生成绩</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="student-id"></td>
+                        <td class="student-name"></td>
+                        <td class="student-grade"></td>
+                        <td class="operating">
+                            <a  data-toggle="modal" onclick="setscInformation(this)" data-target="#myModal" >修改成绩</a>
+                        </td>
+                    </tr>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="student-id"></td>
+                        <td class="student-name"></td>
+                        <td class="student-grade"></td>
+                        <td class="operating">
+                            <a  data-toggle="modal" onclick="setscInformation(this)" data-target="#myModal" >修改成绩</a>
+                        </td>
+                    </tr>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="student-id"></td>
+                        <td class="student-name"></td>
+                        <td class="student-grade"></td>
+                        <td class="operating">
+                            <a  data-toggle="modal" onclick="setscInformation(this)" data-target="#myModal" >修改成绩</a>
+                        </td>
+                    </tr>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="student-id"></td>
+                        <td class="student-name"></td>
+                        <td class="student-grade"></td>
+                        <td class="operating">
+                            <a  data-toggle="modal" onclick="setscInformation(this)" data-target="#myModal" >修改成绩</a>
+                        </td>
+                    </tr>
+
+
+                    </tbody>
+                </table>
+			</div>
+            <div class="bottom-body">
+                <ul class="page-ul">
+                    <li class="page-ul-li">
+                        <div class="input-group" style="width: 110px">
+                            <input type="text" id ="page_num" class="form-control" placeholder="1">
+                            <span class="input-group-btn">
+                                <button id="jump-button" class="btn btn-default" onclick="getCourseInformation()" type="button">跳转</button>
+                             </span>
+                        </div>
+                    </li>
+                    <li class="page-ul-li"></li>
+                    <li class="page-ul-li" style="margin-top: 8px">共&nbsp;<span id="showpage">1</span>&nbsp;页&nbsp;&nbsp;</li>
+                    <li class="page-ul-li"></li>
+                </ul>
+            </div>
+		</div>
+    </div>
+
+
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" >
+					添加成绩
+				</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal" role="form">
+	<div class="form-group">
+		<label for="course-id" class="col-sm-2 control-label">课程编号</label>
+		<div class="col-sm-10">
+			<input type="text" class="form-control" id="course-id"
+				   placeholder="请输入课程编号" disabled="disabled">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="student-id" class="col-sm-2 control-label">学生编号</label>
+		<div class="col-sm-10">
+			<input type="text" class="form-control" id="student-id"
+				   placeholder="请输入学生编号" disabled="disabled">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="student-name" class="col-sm-2 control-label">学生姓名</label>
+		<div class="col-sm-10">
+			<input type="text" class="form-control" id="student-name"
+				   placeholder="请输入学生姓名" disabled="disabled">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="grade" class="col-sm-2 control-label">成绩</label>
+		<div class="col-sm-10">
+			<input type="text" class="form-control" id="grade"
+				   placeholder="请输入成绩">
+		</div>
+	</div>
+</form>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">关闭
+				</button>
+				<button type="button" onclick="insertGrade()" class="btn btn-primary" data-dismiss="modal">
+					提交更改
+				</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+</div>
+    </div>
+</body>
+</html>

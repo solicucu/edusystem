@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>教务系统</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content=""> 
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">  
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+        <style type="text/css" rel="stylesheet">
+            *{
+                margin: 0;
+                padding: 0;
+            }
+            html,body{
+                width: 100%;
+                height: 100%;               
+        		background-image: url("imgs/homebg.png");
+                background-size: 100%100%;
+        	}
+        	.div-mid{
+        		height:100%;
+        		border:1px solid gray;
+                margin:0;
+                background: rgba(225,225,225,0.25);
+            }
+        	.div-top{
+        		width:100%;
+        		height:15%;
+                text-align: center;
+                line-height: 80px;
+                font-size: 60px;
+                color: #000000;
+        		border:0px solid gray;
+                margin-top: 2%;
+                font-family: 华文行楷;
+        	}
+        	.main-content{
+        		width:100%;
+        		height:30%;
+        		border:0px solid gray;
+                margin-top: 4%;
+        	}
+        	.right-body{
+                background-color: rgba(255, 255, 255, 0.8);
+        		width:20%;
+        		height:100%;
+        		float:right;
+        		border:0px solid gray;
+                margin-right: 10%;
+
+            }
+        	.right-body1{
+        		width:100%;
+        		height:12%;
+        		border:0px solid gray;
+
+        	}
+        	.right-body2{
+        		width:100%;
+        		height:82%;	
+                padding:5px;
+                float: left;
+        		border:0px solid gray;
+                margin-left: 7%;
+
+            }
+        	
+    	</style>
+    	<script type="text/javascript">
+            $(document).ready(function () {
+            });
+    		function getAdd(){
+    			var obj = document.getElementById("way"); //定位select
+				var index = obj.selectedIndex; // 选中索引
+				var text = obj.options[index].text; // 选中值
+    			//alert(text)
+    			if(text==="管理员"){
+                    var type = 0;
+                    var uname = $("#username").val();
+                    var upass = $("#userpass").val();
+                    var urlStr = 'http://127.0.0.1:8080/login/confirm?type='+type+'&id='+uname+'&password='+upass;
+                //    alert(urlStr);
+                    $.ajax({
+                        url:urlStr,
+                        dataType:'json',
+                        async:false,
+                        success:function (obj) {
+                            if(obj.code === 0){
+                             //   document.cookie = uname;
+                                window.sessionStorage.setItem("userId", uname);
+                                var f=document.getElementById("myform");
+                                f.action="jwManager.html";
+                                f.submit()
+                            }
+                            else{
+                                alert(obj.message)
+                            }
+                        },
+                        error:function (error) {
+                            alert("can't connected to server !");
+                            console.log(error)
+                            }
+                    })
+    		    }
+    			else if(text==="教师"){
+                    var type = 1;
+                    var uname = $("#username").val();
+                    var upass = $("#userpass").val();
+                    var urlStr = 'http://127.0.0.1:8080/login/confirm?type='+type+'&id='+uname+'&password='+upass;
+                 //   alert(urlStr)
+                     $.ajax({
+                         url:urlStr,
+                         dataType:'json',
+                         async:false,
+                            success:function (obj) {
+                                if(obj.code === 0){
+                                    window.sessionStorage.setItem("userId", uname);
+                                    var f=document.getElementById("myform");
+                                    f.action="jwTeacher.html";
+                                    f.submit()
+                                }else {
+                                    alert(obj.message)
+                                }
+                            },
+                        error:function (error) {
+                        console.log(error)
+                    }
+                })
+    		}
+				else if(text==="学生"){
+                     var type = 2;
+                    var uname = $("#username").val()
+                    var upass = $("#userpass").val()
+                    var urlStr = 'http://127.0.0.1:8080/login/confirm?type='+type+'&id='+uname+'&password='+upass;
+                   // alert(urlStr)
+                     $.ajax({
+                        url:urlStr,
+                        dataType:'json',
+                         async:false,
+                            success:function (obj) {
+                                if(obj.code === 0){
+                                    window.sessionStorage.setItem("userId", uname);
+                                    var f=document.getElementById("myform");
+                                    f.action="jwStudent.html";
+                                    f.submit()
+                                }else {
+                                    alert(obj.message)
+                                }
+                            },
+                        error:function (error) {
+                        console.log(error)
+                    }
+                })
+    			}
+    		}
+
+    	</script>
+        
+</head>
+<body>
+	<div class="div-mid">
+		<div class="div-top">
+            教&nbsp;&nbsp;学&nbsp;&nbsp;服&nbsp;&nbsp;务&nbsp;&nbsp;系&nbsp;&nbsp;统
+		</div>
+		<div class="main-content">
+			<div class="right-body">
+				<div class="right-body1">
+				</div>
+				<div class="right-body2">
+				<form id="myform" action="" onsubmit="getAdd()" method="get">
+					<!--<form id="myform" action="jwStudent" onsubmit="getAdd()" method="get">-->
+					<div class="row show-grid">
+                        <div class="col-sm-3">
+                            用&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;户：
+                        </div>
+                        <div class="col-sm-9">
+					       <select id="way" class="selectpicker" style="width:150px"><option value="manager">管理员</option><option value="teacher">教师</option><option value="student">学生</option></select>
+                        </div>
+                    </div><br>
+                    <div class="row show-grid">
+                        <div class="col-sm-3">
+					       用&nbsp;&nbsp;户&nbsp;&nbsp;名：
+                        </div>
+                        <div class="col-sm-9">
+                            <input style="width:150px" type="text" id="username">
+                        </div>
+                    </div><br>
+                    <div class="row show-grid">
+                        <div class="col-sm-3">
+					       密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码：
+                        </div>
+                        <div class="col-sm-9">
+                            <input style="width:150px" type="password" id="userpass"><br>
+                        </div>
+                    </div><br>
+                    <div class="row show-grid">
+                        <div class="col-sm-3">
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-default" style="width:60px" type="submit">
+                                登陆
+                            </button>
+                        </div>
+                    </div><br>
+				</form>
+			</div>
+		</div>
+	</div>
+    </div>
+</body>
+</html>

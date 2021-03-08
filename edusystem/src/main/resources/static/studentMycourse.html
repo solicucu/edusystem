@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>我的课程</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <style type="text/css" rel="stylesheet">
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        html,body{
+            width: 100%;
+            height: 100%;
+            background-color: #FFFFFF;
+        }
+        a{
+            display:block;
+        }
+        .left-banner a:link {color:#FFFFFF; }
+        .left-banner a:visited {color:#FFFFFF; }
+        .left-banner a:hover {color:#FFFFFF; }
+        .left-banner a:active {color:#FFFFFF;}
+        #top a:link {color:#FFFFFF; }
+        #top a:visited {color:#FFFFFF; }
+        #top a:hover {color:#FFFFFF; }
+        #top a:active {color:#FFFFFF;}
+        .top-body{
+            height:20%;
+            background-image: url('imgs/top_bg.jpg');
+            border:0px solid gray;
+        }
+        .main-body{
+            height:79%;
+            border:0px solid gray;
+        }
+        .left-banner{
+            width:10%;
+            height:100%;
+            float:left;
+            border-right:1px solid gray;
+        }
+        .right-content{
+            width:89%;
+            height:100%;
+            float:right;
+            border:0px solid gray;
+        }
+        .nav_bar{
+            width:100%;
+            height:10%;
+            border:0px solid gray;
+        }
+        .main_content{
+            width:100%;
+            height:89%;
+            border:0px solid gray;
+        }
+        .top_content{
+            width:100%;
+            height:40px;
+            padding:2px;
+            border:0px solid gray;
+        }
+        .table-tr{}
+        .course-id{}
+        .course-name{}
+        .course-day{}
+        .course-session{}
+        .course-grade{}
+
+        .search{
+            width:50%;
+            height:100%;
+            float:left;
+            border:0px solid gray;
+        }
+
+
+        .add_content{
+            width:10%;
+            height:100%;
+            float:right;
+            border:0px solid gray;
+
+        }
+        .table_body{
+            width:100%;
+            height:60%;
+
+            border:0px solid gray;
+        }
+        .bottom-body{
+            width:100%;
+            height:12%;
+            margin-top: 5px;
+        }
+        .table_form{
+            width:100%;
+            border:1px;
+        }
+        .backhome{
+            width:15%;
+            float:right;
+            text-align: right;
+            margin-right:70px;
+            vertical-align: bottom;
+
+
+        }
+        .edit-a:after{
+            content: '';
+            display: inline-block;
+            vertical-align: middle;
+            width: 2px;
+            height: 13px;
+            margin-left: 10px;
+            margin-right: 10px;
+            background-color: #DDDDDD;
+        }
+        .operating a{
+            text-decoration: none;
+        }
+
+        a.page-button{
+            border: none;
+        }
+        .page-ul{
+        }
+        .page-ul-li{
+            display: inline-block;
+            float: right;
+            top: 1px;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+        $(document).ready(
+            function () {
+            }
+        );
+        var s = window.sessionStorage.getItem("userId");
+
+        function withdrawalC(obj){
+            var td = $(obj).parent().parent().find('td');
+            $('#modal-deletecourseId').val(td.eq(0).text());
+        }
+        function withdrawalCourse() {
+            var studentId=s;
+            var courseId = $('#modal-deletecourseId').val();
+            var urlStr = 'http://127.0.0.1:8080/sc/delete?sid='+ studentId + '&cid='+ courseId;
+          //  alert(urlStr);
+            $.ajax({
+                url:urlStr,
+                dataType:'json',
+                success:function (obj) {
+                    if(obj.code == 0){
+                        getmyCourseInformation()
+                        alert("退课成功！");
+                    }else {
+                        alert(obj.message)
+                    }
+                },
+                error:function (error) {
+                    console.log(error)
+                }
+            })
+
+        }
+
+        function getmyCourseInformation() {
+            var page = $('#page_num').val()-1;
+            var size = 6;
+            var sortFieldName = 'id';
+            var asc = 1;
+            var studentid =s;
+            var urlStr = 'http://127.0.0.1:8080/sc/getBySidByPage?sid='+ studentid+'&page='+ page + '&size=' + size + '&sortFieldName=' + sortFieldName + '&asc=' + asc ;
+          //  alert(urlStr);
+            $.ajax({
+                url:urlStr,
+                dataType:'json',
+                cache:false,
+                success:function (obj) {
+                    setmyCourseInformation(obj)
+                },
+                error:function (error) {
+                    console.log(error)
+                }
+            })
+        }
+
+        function setmyCourseInformation(obj) {
+            var table_tr = $('.table-tr');
+            var course_id = $('.course-id');
+            var course_name = $('.course-name');
+            var course_day = $('.course-day');
+            var course_session = $('.course-session');
+            var course_grade = $('.course-grade');
+            for(var i = 0; i < obj.data.numberOfElements; i++){
+                table_tr.eq(i).removeClass('hidden');
+                course_id.eq(i).html(obj.data.content[i].cid);
+                course_name.eq(i).text(obj.data.content[i].cname);
+                course_day.eq(i).text(obj.data.content[i].day);
+                course_session.eq(i).text(obj.data.content[i].session);
+                course_grade.eq(i).text(obj.data.content[i].grade);
+            }
+          for (var i = obj.data.numberOfElements; i < 6; i++) {
+               table_tr.eq(i).addClass('hidden')
+            }
+            document.getElementById("showpage").innerHTML=obj.data.totalPages;
+        }
+    </script>
+
+    <script type="text/javascript">
+
+        window.onload=function(){
+            var s = window.sessionStorage.getItem("userId");
+            var n = null;
+            var urlStr = 'http://127.0.0.1:8080/student/getById?id=' + s;
+            $.ajax({
+                url:urlStr,
+                dataType:'json',
+                async:false,
+                success:function (obj) {
+                    if(obj.code === 0){
+                        n = obj.data.name;
+                    }
+                    else{
+                        alert(obj.message)
+                    }
+                },
+                error:function (error) {
+                    alert("can't connected to server !");
+                    console.log(error)
+                }
+            });
+            document.getElementById("username").innerHTML=n;
+            if(s == null){
+                alert('未登录');
+                window.location.href="jwIndex.html"
+            }
+            getmyCourseInformation()
+        }
+    </script>
+
+</head>
+<body>
+<div class="top-body">
+    <div style="width:70%;font-size: 45px;color:#FFFFFF;text-align:left;vertical-align:middle;line-height:100px;margin-top: 20px;margin-left: 4%;float:left;">教&nbsp;&nbsp;学&nbsp;&nbsp;服&nbsp;&nbsp;务&nbsp;&nbsp;系&nbsp;&nbsp;统
+    </div>
+    <div style="width:20%;height:30px;font-size:20px;color:#FFFFFF;float:right;margin-top: 50px;">
+        欢迎&nbsp;&nbsp;<span id="username">WTF</span>&nbsp;&nbsp;!
+    </div>
+    <div class="backhome">
+        <div id ="top" class="row show-grid">
+            <a style="display:block;" href="jwStudent.html">
+                <div class="col-sm-2">
+                    <img src="imgs/back.png" width="18px" height="18px">
+                </div>
+                <div class="col-sm-3">
+                    返回
+                </div>
+            </a>
+            <a style="display:block;" href="jwIndex.html">
+            <div class="col-sm-2">
+                <img src="imgs/home.png" width="18px" height="18px">
+            </div>
+            <div class="col-sm-3">
+                首页
+            </div>
+        </a>
+        </div>
+    </div>
+</div>
+<div class="main-body">
+    <div class="left-banner">
+        <div style="background:#87CEFA;width:90%; height:20px;margin:5px;text-align: center;" onmouseover="this.style.background='#836FFF'" onmouseout="this.style.background='#87CEFA'" >
+            <a style="font-size:15px;text-decoration:none; " href="studentSelectingcourse.html"  >选课服务</a>
+        </div>
+        <div style="background: #A020F0;width:90%; height:20px;margin:5px;text-align: center;"  >
+            <a style="font-size:15px;text-decoration:none; " href="studentMycourse.html"  >我的课程</a>
+        </div>
+
+    </div>
+    <div class="right-content">
+        <div class="nav_bar">
+            <font font-size="18px"> <b> &nbsp;&nbsp;我的课程</b></font>
+        </div>
+        <hr/>
+        <div class="main_content">
+            <div class="top_content">
+
+            </div>
+            <hr/>
+            <div class="table_body">
+                <table class="table table-striped">
+                    <thead style="background-color: #F9FAFB">
+                    <tr>
+                        <th>课程编号</th>
+                        <th>课程名称</th>
+                        <th>上课时间</th>
+                        <th>上课节次</th>
+                        <th>课程成绩</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="course-name"></td>
+                        <td class="course-day"></td>
+                        <td class="course-session"></td>
+                        <td class="course-grade"></td>
+                        <td class="operating">
+                            <button class="btn btn-default" onclick="withdrawalC(this)" data-toggle="modal" data-target="#myModal-deleteCourse">退选</button>
+                        </td>
+                    </tr>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="course-name"></td>
+                        <td class="course-day"></td>
+                        <td class="course-session"></td>
+                        <td class="course-grade"></td>
+                        <td class="operating">
+                            <button class="btn btn-default" onclick="withdrawalC(this)" data-toggle="modal" data-target="#myModal-deleteCourse">退选</button>
+                        </td>
+                    </tr>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="course-name"></td>
+                        <td class="course-day"></td>
+                        <td class="course-session"></td>
+                        <td class="course-grade"></td>
+                        <td class="operating">
+                            <button class="btn btn-default" onclick="withdrawalC(this)" data-toggle="modal" data-target="#myModal-deleteCourse">退选</button>
+                        </td>
+                    </tr>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="course-name"></td>
+                        <td class="course-day"></td>
+                        <td class="course-session"></td>
+                        <td class="course-grade"></td>
+                        <td class="operating">
+                            <button class="btn btn-default" onclick="withdrawalC(this)" data-toggle="modal" data-target="#myModal-deleteCourse">退选</button>
+                        </td>
+                    </tr>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="course-name"></td>
+                        <td class="course-day"></td>
+                        <td class="course-session"></td>
+                        <td class="course-grade"></td>
+                        <td class="operating">
+                            <button class="btn btn-default" onclick="withdrawalC(this)" data-toggle="modal" data-target="#myModal-deleteCourse">退选</button>
+                        </td>
+                    </tr>
+                    <tr class="table-tr hidden">
+                        <td class="course-id"></td>
+                        <td class="course-name"></td>
+                        <td class="course-day"></td>
+                        <td class="course-session"></td>
+                        <td class="course-grade"></td>
+                        <td class="operating">
+                            <button class="btn btn-default" onclick="withdrawalC(this)" data-toggle="modal" data-target="#myModal-deleteCourse">退选</button>
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="bottom-body">
+                <ul class="page-ul">
+                    <li class="page-ul-li">
+                        <div class="input-group" style="width: 110px">
+                            <input type="text" id ="page_num" class="form-control" placeholder="1">
+                            <span class="input-group-btn">
+                                <button id="jump-button" class="btn btn-default" onclick="getmyCourseInformation()" type="button">跳转</button>
+                             </span>
+                        </div>
+                    </li>
+                    <li class="page-ul-li"></li>
+                    <li class="page-ul-li" style="margin-top: 8px">共&nbsp;<span id="showpage">1</span>&nbsp;页&nbsp;&nbsp;</li>
+                    <li class="page-ul-li"></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal-deleteCourse" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" >
+                    退选
+                </h4>
+            </div>
+
+            <div class="modal-body">
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label for="modal-deletecourseId" class="col-sm-3 control-label">请确认课程编号</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="modal-deletecourseId"
+                                   placeholder="" disabled="disabled">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                </button>
+                <button type="button" onclick="withdrawalCourse(this)" class="btn btn-primary" data-dismiss="modal">
+                    确认更改
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
